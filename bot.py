@@ -14,17 +14,21 @@ class Bot:
         conf.read('/home/hacky/betterthanautomod/praw.ini')
         config = conf['meodp2']
 
-        self.reddit = praw.Reddit(username=config['username'], password=config['password'], client_id=config['client_id'], client_secret=config['client_secret'], user_agent=config['user_agent'])
-        self.subreddit = self.reddit.subreddit(config['subreddit'])
-        self.file = '/home/hacky/betterthanautomod/approved.db'
+        self.reddit = praw.Reddit('meopd2')
+        self.subreddit = self.reddit.subreddit(reddit.config.custom['subreddit'])
+        
+        # Does not need to exit
+        self.file = '/path/to/database/file.db'
 
         self.conn = sqlite3.connect(self.file)
         self.cursor = self.conn.cursor()
 
+        # Create table
         self.cursor.execute("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, approved INTEGER, pending INTEGER, prior INTEGER)")
         self.cursor.execute("SELECT * FROM users")
         self.data = self.cursor.fetchall()
 
+        # Me trying to be clever.
         changed = False
 
         for item in self.subreddit.new(limit=None):
@@ -36,6 +40,7 @@ class Bot:
                 self.cursor.execute("INSERT OR REPLACE INTO users VALUES (?, ?, ?, ?)", (str(item.author), 0, 0, 1))
                 changed = True
 
+        # It wasn't clever.
         if changed:
             self.conn.commit()
 
@@ -45,6 +50,7 @@ class Bot:
 
     def start(self):
 
+        # DIY Stream Loop
         while True:
             self.stream()
             time.sleep(1)
@@ -88,14 +94,14 @@ class Bot:
 
 Please confirm if you have read both the FAQ and The Ultimate Antinatalism Argument Guide Document.
 
-[Confirm](https://www.reddit.com/message/compose/?to=AlphaMaleThrowAway2&subject=hi&message=yes) (Don't forget to hit "send")"""
+[Confirm](https://www.reddit.com/message/compose/?to=AlphaMaleThrowAway2&subject=hi&message=yes) (Don't forget to hit "send" after clicking `Confirm`)"""
         
         else:
             msg = """We've detected that you're about to make your first post/comment on /r/AskAnAntinatalist. We would like to remind you to please make sure you've fulfilled the reading requirements over at our [wiki](https://new.reddit.com/r/AskAnAntinatalist/wiki/index?utm_source=reddit&utm_medium=usertext&utm_name=AskAnAntinatalist&utm_content=t5_287k4n) before participating. This is to ensure as much as possible that quality and original discussion takes place on our sub. 
 
 Please confirm if you have read both the FAQ and The Ultimate Antinatalism Argument Guide Document.
 
-[Confirm](https://www.reddit.com/message/compose/?to=AlphaMaleThrowAway2&subject=hi&message=yes) (Don't forget to hit "send")"""
+[Confirm](https://www.reddit.com/message/compose/?to=AlphaMaleThrowAway2&subject=hi&message=yes) (Don't forget to hit "send" after clicking `Confirm`)"""
 
         try:
             user.message('Hold Your Horses!', msg)
@@ -113,10 +119,6 @@ def main():
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception:
-        with open('/home/hacky/betterthanautomod/error.txt', 'w') as f:
-            f.write(f"{sys.exc_info()}\n")
+    main()
 
 
