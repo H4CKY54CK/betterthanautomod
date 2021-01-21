@@ -4,15 +4,10 @@ import sqlite3
 import os
 import prawcore
 import time
-from configparser import ConfigParser
 
 class Bot:
 
     def __init__(self, site):
-
-        conf = ConfigParser()
-        conf.read('/home/hacky/betterthanautomod/praw.ini')
-        config = conf['meodp2']
 
         self.reddit = praw.Reddit('meopd2')
         self.subreddit = self.reddit.subreddit(reddit.config.custom['subreddit'])
